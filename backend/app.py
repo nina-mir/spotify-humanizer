@@ -123,7 +123,11 @@ def recent_songs_history_worker():
                     print('⏸️  No new tracks since last check')
             
             # Wait before next check (adjust interval as needed)
-            time.sleep(30)  # Check every 30 seconds
+            # The thread sleep could be an adjustable variable depending on the user's listening habits
+            # medium is 100 minutes i.e. 50 songs of 2 min lenght
+            # frequent is 15 minutes
+            # occassional user is 180 minutes & so on                 
+            time.sleep(6000)  # Check every 6000 seconds i.e. 50 tracks of 2 min length
             
         except Exception as e:
             print(f'❌ Error fetching recent tracks: {e}')

@@ -5,6 +5,7 @@ Scripts/
 pyvenv.cfg
 
 # Cached stuff
+.cache
 .cached
 .cache_Nina
 
