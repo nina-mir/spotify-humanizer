@@ -25,10 +25,58 @@ sp_oauth = SpotifyOAuth(
 app = Flask(__name__)
 
 
+def top_artists_songs_worker(time_range='medium_term'):
+    """
+    Make API calls to get user's top songs and artists for different time ranges.
+    
+    This function performs a series of discrete API calls (not continuous monitoring)
+    to retrieve the user's listening statistics across specified time periods.
+    
+    Args:
+        time_range (str): Time period for analysis. Options are:
+            - 'long_term': ~1 year of data, updated with new data
+            - 'medium_term': ~6 months (default)
+            - 'short_term': ~4 weeks
+    
+    Returns:
+        dict or None: Contains top artists and songs data, or None if API call fails
+        
+    Raises:
+        ConnectionError: If API connection fails
+        ValueError: If time_range parameter is invalid
+    """
+    
+
+
 def recent_songs_history_worker():
     """
-    Worker that continuously monitors and displays recently played tracks
-    """
+    Continuously monitor and display the user's recently played tracks.
+    
+    This worker runs in a loop, periodically checking for new recently played tracks
+    and displaying them to the console. It waits for authentication to complete before
+    starting and maintains state to only show new tracks since the last check.
+    
+    Dependencies:
+        - Requires `sp_client` global variable to be set after authentication
+        - Uses `auth_is_complete` event to wait for authentication
+        - Uses `sp_client_lock` for thread-safe access to Spotify client
+        
+    Behavior:
+        - Initially displays the last 50 played tracks
+        - Subsequent checks only show new tracks since last poll
+        - Uses a 100-minute polling interval (optimized for typical listening patterns)
+        - Implements error handling with retry logic
+        
+    Side Effects:
+        - Prints track information to console
+        - Modifies global state (last_track_played_at tracking)
+        - Makes periodic API calls to Spotify Web API
+        
+    Error Handling:
+        - Continues running on errors with exponential backoff
+        - Handles authentication and API failures gracefully
+    """    
+    
     print('🎵 Recent Songs Worker: Waiting for authentication... ⏳')
     global sp_client
     
