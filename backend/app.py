@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+import time
+
 from flask import Flask, render_template, request
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -6,8 +10,9 @@ import threading
 import time
 from datetime import datetime
 
+
 config = dotenv_values(".env")
-scope = "user-read-recently-played playlist-read-private user-top-read user-library-read user-read-private"
+scope = "user-read-recently-played user-top-read"
 
 # Shared state between routes and worker
 auth_is_complete = threading.Event()
@@ -24,8 +29,10 @@ sp_oauth = SpotifyOAuth(
 
 app = Flask(__name__)
 
+# create a results folder
+Path('results').mkdir(exist_ok=True)
 
-def top_artists_songs_worker(time_range='medium_term'):
+def user_top_items_worker(time_range='medium_term'):
     """
     Make API calls to get user's top songs and artists for different time ranges.
     
@@ -45,8 +52,101 @@ def top_artists_songs_worker(time_range='medium_term'):
         ConnectionError: If API connection fails
         ValueError: If time_range parameter is invalid
     """
+
+    # TO-DO: Change it later! 
+    # dev notes: for now it is only about artists and short_term
+
+    print('🎵 Top Songs & 🎤🎷🎶Artists Worker: Waiting for authentication... ⏳')
+    
+    # initial values
+  
+    total_items = None
+    top_tracks = []
+    top_artists = []
+
+
+    global sp_client
+    
+    auth_is_complete.wait()  # Block until auth is done
+    
+    print('✅ Authentication complete! Starting retreiving top artists ...\n')
+    print(f'The time_range this worker is retreiving is {time_range}')
+    
+    # Wait a moment to ensure sp_client is fully set
+    time.sleep(1)
+    
+    with sp_client_lock:
+        if not sp_client:
+            print('❌ Error: Spotify client not initialized')
+            return
+        
+        try:
+            curr_user = sp_client.current_user()
+            # To-DO store this info somewhere or feed it to a template for the user?    
+            print(f'👋 Hello {curr_user["display_name"]}!')
+            print(f'📧 User: {curr_user["id"]}\n')
+        except Exception as e:
+            print(f'❌ Error getting user info: {e}')
+            return
     
 
+
+    try:
+        offset = 0
+        limit = 50
+        
+        while True:
+
+            with sp_client_lock:
+                # Fetch the first 50 recently played songs
+                results = sp_client.current_user_top_artists(
+                    limit=limit, 
+                    offset=offset, 
+                    time_range=time_range
+                )
+                print(len(results))
+                if not results or 'items' not in results:
+                    print(f'⚠️{curr_user["display_name"]} has no top artists!')
+                    break 
+
+                if total_items is None:
+                    total_items = results['total']  # Set once
+                    print(f"Total items available: {total_items}")   
+
+                items = results['items']
+                top_artists.extend(items)
+                offset += len(items)
+                
+                if len(top_artists) >= total_items:
+                    break
+
+                time.sleep(3)
+
+        print(f'Successfully fetched the top tracks listened by {curr_user["display_name"]}!')
+        print(f'Info of {len(top_artists)} artists out of {total_items} total top artists is available!')
+        print("let's write it to file!")
+
+        results_data = {
+            'metadata': {
+                'time_range': time_range,
+                'total_items': total_items,
+                'fetched_count': len(top_artists),
+                'timestamp': datetime.now().isoformat()
+            },
+            'artists': top_artists
+        }
+
+        with open('results/top_artists.json', 'w', encoding='utf-8') as writer:
+            json.dump(results_data, writer, indent=2, ensure_ascii=False)
+
+        print(f"💾 Results saved to results/top_artists.json")
+        
+        return
+
+
+    except Exception as e:
+        print(f'error {e} occurred.')
+         
 
 def recent_songs_history_worker():
     """
@@ -224,9 +324,11 @@ def run_flask():
 
 
 if __name__ == "__main__":
-    # Start the recent songs monitoring worker
+
+
     songs_daemon = threading.Thread(
-        target=recent_songs_history_worker, 
+        target=user_top_items_worker,
+        args=('short_term',),
         name='recent-songs-worker',
         daemon=True
     )

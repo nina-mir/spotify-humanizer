@@ -9,6 +9,9 @@ pyvenv.cfg
 .cached
 .cache_Nina
 
+# Streamlit files
+secrets.toml
+
 # Python specific
 __pycache__/
 *.py[cod]
