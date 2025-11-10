@@ -5,13 +5,12 @@ from spotipy.oauth2 import SpotifyOAuth
 import json
 from spotipy.oauth2 import SpotifyOAuth
 from src.init_setup_styling import init_global_sidebar_styles
-from src.greeting_user import greet_authenticated_user
+from src.greeting_user import display_user_profile, initialize_user_data
+from src.top_items import user_top_items_worker
 
-
-# st.write(st.secrets['SPOTIPY_CLIENT_ID'])
 
 scope = "user-read-recently-played user-top-read"
-  
+
 
 def initialize_spotipy_oauth():
     return SpotifyOAuth( 
@@ -46,7 +45,6 @@ def main():
     if auth_code and not st.session_state.auth_complete:
     
         #  Handle the callback! 
-    
         try:
     
             sp_oauth = initialize_spotipy_oauth()
@@ -79,36 +77,66 @@ def main():
         """, unsafe_allow_html=True)
 
     else:
-        # User is authenticated - show your app
-        # st.success(, icon="✅")
-        st.toast("Successfully authenticated with Spotify!", icon=":material/celebration:")
-        
+
         try:
-            # sp = st.session_state.sp_client
-            # curr_user = sp.current_user()
-            # # print(curr_user)
-            
-            # # Let's show user info to the user
-            # col1, col2 = st.columns(2)
-
-            # with col1:
-            #     st.write(f'👋 Hello {curr_user["display_name"]}!')
-            #     st.write(f'📧 User: {curr_user["id"]}\n')
-
-            # with col2:
-            #     user_image_url = curr_user['images'][0]['url']
-            #     print(user_image_url)
-            #     st.image(user_image_url)
-            greet_authenticated_user()
+            # toast message is included in initialize_user_data() along balloons. maybe a bit too much! but, well! 
+            initialize_user_data()
+            display_user_profile()
+            st.write("""
+                <hr style='margin:0;'>         
+            """, unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f'❌ Error getting user info: {e}')
-            return
         
         if st.session_state.auth_complete:
-            st.button('get artists')
+            st.markdown(
+                """
+                <style>
+                .stRadio [role=radiogroup]{
+                    margin-top:0.25rem;
+                    display: flex;
+                    justify-content: center;
+                }
 
+                div[data-testid="stRadio"] > label > div {
+                    font-size: 1.2rem;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
+            time_range = st.radio(
+                "# Select a time_range 👇",
+                ["short_term", "medium_term", "long_term"],
+                captions=[
+                    "approx. last 4 weeks",
+                    "approx. last 6 months",
+                    "approx. ~1 year of data",
+                ],
+                # key="visibility",
+                # label_visibility=st.session_state.visibility,
+                # disabled=st.session_state.disabled,
+                horizontal=True,
+                index=None
+            )
+
+            if time_range:
+                st.write(f":material/music_history: You selected **{time_range}**!")
+                st.session_state.time_range = time_range
+
+            col1, spacer, col2 = st.columns([3, 1, 3])
+
+            with col1:
+                if st.button(':material/person_play: Artists', use_container_width=True):
+                    artists_data = user_top_items_worker()
+                    st.json(artists_data, expanded=2)
+
+            with col2:
+                if st.button('🎶 Songs', use_container_width=True):
+                    artists_data = user_top_items_worker()
+                    st.json(artists_data, expanded=2)
 
 
 
