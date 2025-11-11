@@ -69,6 +69,63 @@ def init_global_sidebar_styles():
     </style>
     """, unsafe_allow_html=True)
     
+    st.markdown(
+                """
+            <style>
+
+            div[class*="stElementContainer"]:has(> [data-testid="stRadio"]) {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            /* Target label element of the radio group */
+
+            .stRadio > label > div[data-testid="stMarkdownContainer"]{
+                font-size: 1.6rem;
+            }
+
+            .stRadio [role=radiogroup] {
+                width: 100% !important;
+                display: flex !important;
+                flex-wrap: wrap;
+                justify-content: center !important;
+                align-items: center !important;  
+                gap: 2rem;  /* Space between items */
+            }            
+
+            /* targeting the caption text of each radio group item */
+            .stRadio div[data-testid="stCaptionContainer"] > p {
+                color: #1a1a1a;
+                font-family: new-science-mono, sans-serif;
+                text-align: center;
+                text-shadow: 0 1px 2px rgba(255,255,255,0.8); /* White shadow */
+
+            }
+               
+            .stRadio div[data-testid="stMarkdownContainer"] > p {
+                font-weight: bold;
+            }
+
+            /* Mobile breakpoint - stack vertically */
+            @media (max-width: 768px) {
+                .stRadio [role=radiogroup] {
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content:center;
+                }
+                
+                .stRadio label[data-baseweb="radio"] {
+                    flex: none;  /* Reset flex behavior */
+                    min-width: 200px;  /* Minimum width before wrapping */
+
+                }
+            }
+            </style>
+
+                """,
+                unsafe_allow_html=True
+            )
+
 
 
     with st.sidebar:
