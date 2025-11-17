@@ -30,6 +30,7 @@ def extract_track_data(raw_data, time_range):
         track_info = {
             'name': track.get('name'),      
             'artists': simplified_artists,
+            'images' : track.get('album').get('images', []),
             'duration_ms': track.get('duration_ms'),
             'spotify': track.get('external_urls', {}).get('spotify'),
             'popularity': track.get('popularity'),
