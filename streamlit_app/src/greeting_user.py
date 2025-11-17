@@ -10,14 +10,14 @@ def initialize_user_data():
         st.session_state.user_initialized = True
         
         # Show balloon on initialization
-        st.balloons()
+        # st.balloons()
 
 def display_user_profile():
     """Display user profile (safe to call multiple times)"""
     if st.session_state.get('user_initialized'):
         curr_user = st.session_state.curr_user
         
-        col1, col2 = st.columns([2, 1])
+        col1, col2 = st.columns([1, 1])
 
         with col1:
             st.write(f"Hello, **{curr_user['display_name']}**! :material/waving_hand: ")
@@ -25,9 +25,12 @@ def display_user_profile():
             st.image(user_image_url)
 
         with col2:
-            st.space("small")
-            st.info("""
-                    Press the buttons below and learn what songs, 
-                    which artists you've been listening to over the past few weeks, months or year!
-                    """, icon=":material/info:")
+            st.markdown(""" 
+                    #### How this works :material/info:   
+                    :material/counter_1: Select a time_range value for your data.  
+                    :material/counter_2: Fetch your corresponding top artists or tracks.  
+                    :material/counter_3: Download your data!          
+                    :material/counter_4: Check-out Artists / Tracks Analytics pages for more!     
+                    :material/counter_5: Go to a local music show! :material/heart_smile:    
+                    """)
 

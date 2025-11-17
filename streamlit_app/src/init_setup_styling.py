@@ -29,6 +29,10 @@ def init_global_sidebar_styles():
             padding-top: 0 !important;
             margin-top: 0 !important;
         }
+                
+        [data-testid="stSidebarUserContent"] {
+                padding-top: unset;
+        }
         
         /* Collapse button when sidebar is CLOSED (hamburger menu) */
         [data-testid="collapsedControl"] {
@@ -66,6 +70,15 @@ def init_global_sidebar_styles():
             background-color: #f0f0f0 !important;
             border-color: #45a049 !important;
         }
+        /* Targeting the navbar in the Sidebar */    
+        # [data-testid="stSidebarNavLinkContainer"]{
+        #     background-color:  #242424;
+        # }
+                
+        [data-testid="stSidebarNavLink"] > span {
+            color: white !important;
+        }
+    
     </style>
     """, unsafe_allow_html=True)
     

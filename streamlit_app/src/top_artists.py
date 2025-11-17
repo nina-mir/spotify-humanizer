@@ -1,9 +1,9 @@
 from datetime import datetime
 import streamlit as st
 import time
-import json
 
-def user_top_items_worker(time_range='short_term'):
+@st.cache_data
+def user_top_artists_worker(time_range='short_term'):
     """
     Make API calls to get user's top songs and artists for different time ranges.
     
@@ -45,12 +45,9 @@ def user_top_items_worker(time_range='short_term'):
         status_placeholder.info(f'The time_range this worker is retreiving is {time_range}')
         
 
-
         try:
             offset = 0
             limit = 50
-
-            
 
             # set the spotipy client and curr_user info from session cache
             sp = st.session_state.sp_client
