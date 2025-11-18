@@ -1,6 +1,8 @@
 from src.data_visualizers import render_tracks_grid
 import streamlit as st
 from src.data_transformers import extract_track_data
+from src.pagination import array_paginator, top_pagination_controllers
+
 
 # Layout
 
@@ -32,16 +34,18 @@ if "time_range" in st.session_state and st.session_state.tracks_data:
         if time_range:
                 st.write(f":material/music_history: You selected **{time_range}**!")
                 st.session_state.time_range = time_range
-                transformed_tracks_data = extract_track_data(st.session_state.tracks_data[current_range], current_range)
+                transformed_tracks_data = extract_track_data(st.session_state.tracks_data[time_range], time_range)
                 st.subheader(f"Your Top Tracks - {time_range.replace('_', ' ').title()}")
-                render_tracks_grid(transformed_tracks_data.get("tracks", []), columns=4)  # 4 columns
+                render_tracks_grid(transformed_tracks_data.get("tracks", [])[0:100], columns=4)  # 4 columns
                 # st.rerun()
 
     else:
+        top_pagination_controllers(1, 10)
         transformed_tracks_data = extract_track_data(st.session_state.tracks_data[current_range], current_range)
         st.subheader(f"Your Top Tracks - {current_range.replace('_', ' ').title()}")
-        render_tracks_grid(transformed_tracks_data.get("tracks", []), columns=4)  # 4 columns
+        render_tracks_grid(transformed_tracks_data.get("tracks", [])[0:100], columns=4)  # 4 columns
 
+    
 else:
     st.header("Your Tracks Analytics")
     st.warning('# Nothing to see!   (>_<)', icon="⚠️")
@@ -65,5 +69,9 @@ else:
                     <ol> 
                 <div>
              """, unsafe_allow_html=True)
+    
+
+
+
 
     
