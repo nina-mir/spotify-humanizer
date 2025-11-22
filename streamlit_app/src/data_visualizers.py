@@ -86,7 +86,7 @@ def plot_genre_distribution(artists_data):
     pass
 
 
-def render_tracks_grid(tracks_data, columns=3):
+def render_tracks_grid(tracks_data, columns=3, idx_offset=0):
     """
     Render tracks in a grid layout with cards showing image, name, rank, followers, and Spotify link.
     
@@ -151,7 +151,7 @@ def render_tracks_grid(tracks_data, columns=3):
                 break
             
             track = tracks_data[track_idx]
-            rank = track_idx + 1  # Rank is 1-indexed
+            rank = track_idx + 1 + idx_offset # Rank is 1-indexed
             
             with col:
                 # Create a container for the card
